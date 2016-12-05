@@ -12,7 +12,8 @@ import {
   View,
   Button,
   Alert,
-  ListView
+  ListView,
+  Image
 } from 'react-native';
 
 export default class bananaAcfun extends Component {
@@ -20,8 +21,10 @@ export default class bananaAcfun extends Component {
     super(props)
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
     this.state = {
+      getData: false,
       dataSource: ds.cloneWithRows([])
     }
+    this.handlerGetAcfun()
   }
   handlerGetAcfun () {
     fetch('http://www.acfun.tv/', {
@@ -42,9 +45,9 @@ export default class bananaAcfun extends Component {
       }
       const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
       this.setState({
-        dataSource: ds.cloneWithRows(bananaArr)
+        dataSource: ds.cloneWithRows(bananaArr),
+        getData: true
       })
-      console.log(bananaArr)
     })
   }
   // handlerGetAcfun () {
@@ -53,32 +56,28 @@ export default class bananaAcfun extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu
-        </Text>
-        <Button
-          onPress={this.handlerGetAcfun.bind(this)}
-          title="点击我"
-          color="#841584"
-        />
-        <ListView
-          style={{flex: 5}}
-          dataSource={this.state.dataSource}
-          renderRow={(rowData) => {
-            return (
-              <View>
-                <Text>{rowData.title}</Text>
-              </View>
+        <View>
+          {
+            !this.state.getData && (
+              <Text>获取数据中...</Text>
             )
-          }}
-        />
+          }
+          {
+            this.state.getData && (
+              <ListView
+                style={{flex: 5}}
+                dataSource={this.state.dataSource}
+                renderRow={(rowData) => {
+                  return (
+                    <View>
+                      <AcfunVideo videoInfo={{title: rowData.title, imageUrl: rowData.img}}></AcfunVideo>
+                    </View>
+                  )
+                }}
+              />
+            )
+          }
+        </View>
       </View>
     );
   }
@@ -104,3 +103,22 @@ const styles = StyleSheet.create({
 });
 
 AppRegistry.registerComponent('bananaAcfun', () => bananaAcfun);
+
+class AcfunVideo extends Component {
+  constructor(props) {
+    super(props)
+  }
+  render () {
+    return (
+      <View>
+        <Image
+          style={{width: 320, height: 180}}
+          source={{uri: this.props.videoInfo.imageUrl}}
+        ></Image>
+        <View>
+          <Text>{this.props.videoInfo.title}</Text>
+        </View>
+      </View>
+    )
+  }
+}
